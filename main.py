@@ -74,7 +74,7 @@ def draw(image, boxes, classnames, scores):
 
     return image
 
-video = cv2.VideoCapture('vidio/vid4.mp4')
+video = cv2.VideoCapture(1)
 while True:
     _, img = video.read()
     img = cv2.resize(img, (900, 700))
