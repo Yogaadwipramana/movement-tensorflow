@@ -40,7 +40,7 @@ def drawbox(image, ymin, xmin, ymax, xmax, namewithscore, color):
         thickness=math.ceil(min(width, height) * THICKNESS_SCALE),
         color=(255, 255, 255)
     )
-    
+
 def draw(image, boxes, classnames, scores):
     global door_open, door_open_counter
     
@@ -60,17 +60,21 @@ def draw(image, boxes, classnames, scores):
         namewithscore = "{}:{}".format(classname, int(100 * scores[i]))
         drawbox(image, ymin, xmin, ymax, xmax, namewithscore, color)
         
-        # Check if person class is detected (you may need to adjust the class name)
-        if classname.lower() == 'person':
-            # Assuming opening the door is detected when a person is detected
+        if classname.lower() == 'door':
             if not door_open:
+                # Assuming opening the door is detected when a 'door' is detected and door is not already open
                 door_open = True
                 door_open_counter += 1
                 print(f"Door opened! Total opens: {door_open_counter}")
+        elif classname.lower() == 'person':
+            # Assuming closing the door is detected when a 'person' is detected and door is already open
+            if door_open:
+                door_open = False
+                print("Door closed!")
+
     return image
 
-
-video = cv2.VideoCapture(0)
+video = cv2.VideoCapture('vidio/vid4.mp4')
 while True:
     _, img = video.read()
     img = cv2.resize(img, (900, 700))
@@ -80,5 +84,9 @@ while True:
     result = {key: value.numpy() for key, value in detection.items()}
     imagewithboxes = draw(img, result['detection_boxes'], result['detection_class_entities'], result["detection_scores"])
     cv2.imshow("detection", imagewithboxes)
-    cv2.waitKey(27)
-    
+    if cv2.waitKey(27) & 0xFF == ord('q'):
+        break
+
+# Print the final count of door opens and closes
+print(f"Final count: Door opened {door_open_counter} times.")
+cv2.destroyAllWindows()
